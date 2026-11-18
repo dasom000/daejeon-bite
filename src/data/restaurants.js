@@ -19,7 +19,7 @@ const restaurants = [
     rating: 4.0,
     visitDate: '2026.11.08',
     revisit: true,
-    image: 'ㅑ',
+    image: '',
   },
   {
     id: 3,
