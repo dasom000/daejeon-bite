@@ -1,9 +1,23 @@
+import { useState } from 'react'
 import restaurants from './data/restaurants.js'
 import RestaurantCard from './components/RestaurantCard'  
 const regions = ['전체', '동구', '중구', '서구', '유성구', '대덕구']
 
 function App() {
-  const selectedRegion = '전체'
+  const [selectedRegion, setSelectedRegion] = useState('전체')
+  const [keyword, setKeyword] = useState('')
+
+  const filteredRestaurants = restaurants.filter((restaurant) => {
+    const matchesRegion = selectedRegion === '전체' || restaurant.region === selectedRegion
+    const matchesKeyword = restaurant.name.includes(keyword) || restaurant.menu.includes(keyword)
+    return matchesRegion && matchesKeyword
+  })
+//필터 초기화
+  const resetFilter = () => {
+    setSelectedRegion('전체')
+    setKeyword('')
+  } 
+
   return (
     <div className="min-h-screen bg-neutral-100">
       <div className="mx-auto min-h-screen max-w-120 bg-white">
@@ -22,6 +36,8 @@ function App() {
             <input
               type="text"
               placeholder="식당 이름, 메뉴로 검색"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
               className="w-full bg-transparent text-sm outline-none placeholder:text-neutral-400"
             />
           </div>
@@ -31,6 +47,7 @@ function App() {
             {regions.map((region) => (
               <button
                 key={region}
+                onClick={() => setSelectedRegion(region)}
                 className={
                   region === selectedRegion
                     ? 'shrink-0 rounded-full bg-neutral-900 px-4 py-2 text-sm font-medium text-white'
@@ -46,14 +63,14 @@ function App() {
           {/* 목록 제목 */}
           <div className="mt-8 flex items-center justify-between">
             <h2 className="font-bold text-neutral-900">
-              나의 맛집 기록 <span className="text-brand">{restaurants.length}</span>
+              나의 맛집 기록 <span className="text-brand">{filteredRestaurants.length}</span>
             </h2>
             <button className="text-sm text-neutral-500">최신순</button>
           </div>
  
           {/* 맛집 목록 */}
-          {restaurants.length === 0 ? (
-            //기록이 없을 때
+           {/*기록이 하나도 없을 떄 */}
+           {restaurants.length === 0 &&(
             <div className="flex flex-col items-center py-20 text-center">
             <div className="flex size-16 items-center justify-center rounded-full bg-brand-light">
               <svg className="size-7 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -64,9 +81,24 @@ function App() {
             <p className="mt-4 font-bold text-neutral-900">아직 기록한 맛집이 없어요</p>
             <p className="mt-1 text-sm text-neutral-500">+ 버튼을 눌러 첫 번째 맛집을 기록해 보세요.</p>
             </div>
-            ) : (
+           )}
+           {/*조건에 맞는 맛집이 없을 때 */}
+           {restaurants.length > 0 && filteredRestaurants.length === 0 &&(
+            <div className='flex flex-col items-center py-20 text-center'>
+              <p className='font-bold text-neutral-900'>조건에 맞는 맛집이 없어요</p>
+              <p className='mt-1 text-sm text-neutral-500'>검색어나 지역을 바꿔보세요.</p>
+              <button 
+                onClick={resetFilter}
+                className='mt-5 rounded-full border border-neutral-200 px-4 py-2 text-sm text-neutral-700'
+              >
+                필터초기화
+              </button>
+            </div>
+           )}
+           {/*맛집 목록 있을 떄*/}
+          {restaurants.length > 0 && (
               <ul className="mt-2 divide-y divide-neutral-100">
-                {restaurants.map((restaurant) => (
+                {filteredRestaurants.map((restaurant) => (
                   <RestaurantCard
                     key={restaurant.id}
                     name={restaurant.name}
